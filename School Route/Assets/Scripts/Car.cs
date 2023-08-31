@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
-    public int roadIndex;
+    [HideInInspector]public Road road;
     public float speed;
     public bool stopsAtCrosswalks;
 
@@ -18,7 +18,7 @@ public class Car : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (GameManager.instance.gameOver) return;
+        if (CanvasManager.instance.retryPanel.activeInHierarchy) return;
 
         if (stopsAtCrosswalks)
         {
@@ -26,8 +26,10 @@ public class Car : MonoBehaviour
             if (Physics.Raycast(transform.position, Vector3.right, out hit, 2))
             {
                 // Stop and wait for kids to cross the road
-                if ((hit.collider.tag == "CrossBarrier" && GameManager.instance.roadIndex == roadIndex) || hit.collider.GetComponent<Car>()) 
+                if ((hit.collider.tag == "CrossBarrier" && GameManager.instance.roadIndex == road.index && 
+                    !GameManager.instance.gameEnded) || hit.collider.GetComponent<Car>()) 
                     rb.velocity = Vector3.zero;
+                else rb.velocity = Vector3.right * speed * Time.fixedDeltaTime;
             }
             else rb.velocity = Vector3.right * speed * Time.fixedDeltaTime;
         }
@@ -37,8 +39,8 @@ public class Car : MonoBehaviour
             if (Physics.Raycast(transform.position, Vector3.right, out hit, 2))
             {
                 // Stop and wait for car in front to move
-                if (hit.collider.GetComponent<Car>())
-                    rb.velocity = Vector3.zero;
+                if (hit.collider.GetComponent<Car>()) rb.velocity = Vector3.zero;
+                else rb.velocity = Vector3.right * speed * Time.fixedDeltaTime;
             }
             else rb.velocity = Vector3.right * speed * Time.fixedDeltaTime;
         }

@@ -119,7 +119,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 999b286cc74c0b54fb1cc5e4a273eb04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 250
+  roadIndex: 0
+  speed: 300
+  stopsAtCrosswalks: 0
 --- !u!54 &4881368808720634211
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -7,26 +7,29 @@ public class Kid : MonoBehaviour
     public float speed;
     public int index;
 
+    [Tooltip("How much the child will wait before going")]
+    public float goDelay = 2;
     public bool readyToGo;
     public bool moving;
     public bool crossed;
 
-    public Transform nextBarrier;
-
     private Rigidbody rb;
     private Transform GFX;
     private Animator animator;
+    private float multiplier = 1;
+    [HideInInspector] public Road road;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         GFX = transform.GetChild(0);
         animator = GetComponent<Animator>();
+        road = GetComponentInParent<Road>();
     }
 
     private void FixedUpdate()
     {
-        if (index < 0 || GameManager.instance.gameOver)
+        if (index < 0 || GameManager.instance.gameEnded)
         {
             rb.velocity = Vector3.zero;
             return;
@@ -34,7 +37,7 @@ public class Kid : MonoBehaviour
 
         // Shoot a raycast if it hits something, stop
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, transform.forward, out hit, 1))
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 1 * multiplier))
         {
             if (moving) // If moving check for obstacles
             {
@@ -56,17 +59,19 @@ public class Kid : MonoBehaviour
 
                     if (kid.crossed) crossed = true;
 
+                    // When you collide with another kid, prolong the vision so there is a delay when the kids start moving
+                    multiplier = goDelay;
+
                     // Check if that was the last kid to cross the street
-                    if (kid.crossed && index == GameManager.instance.kids.Count - 1)
-                    {
-                        print(index + " " + (GameManager.instance.kids.Count - 1));
-                        GameManager.instance.NextRoad();
-                    }
+                    if (kid.crossed && index == GameManager.instance.kids.Count - 1) GameManager.instance.NextRoad();
                 }
             }
         }
-        else moving = true;
-
+        else
+        {
+            multiplier = 1;
+            moving = true;
+        }
 
         // Once it has started moving check for kids in it's way
         if (moving) rb.velocity = Vector3.forward * speed * Time.fixedDeltaTime;
